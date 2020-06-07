@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
+  <style type="text/css" media="print">
+    .screen {
+      visibility: hidden;
+    }
+
+  </style>
+  <style type="text/css">
+    body {
+      font-weight: 400;
+      font-family: "UD Digi Kyokasho NK-R";
+      margin: 0 1rem;
+    }
+
+    .s-row {
+      margin-bottom: 7rem;
+      font-size: 2.5rem;
+      line-height: 2.5rem;
+    }
+
+    .sub2 {
+      border-bottom: 0.1rem black solid;
+      margin-bottom: 0.4rem;
+    }
+
+    .form-select {
+      width: 4rem;
+    }
+
+    .form-seed {
+      width: 20rem;
+    }
+
+  </style>
+  <title>引き算</title>
+</head>
+
+<body>
+  <div id="app" class="container-fluid">
+    <div class="d-flex align-items-center mb-4">
+      <div class="btn btn-primary mr-5 screen" @click="showAnswer = !showAnswer">解答表示</div>
+      <div class="mr-2 screen">行</div>
+      <select v-model.number="row" class="form-control form-select screen">
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+        <option>6</option>
+      </select>
+      <div class="ml-5 mr-2 screen">列</div>
+      <select v-model.number="col" class="form-control form-select screen">
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+      </select>
+      <div class="ml-5 mr-2 screen">桁数</div>
+      <select v-model.number="digit" class="form-control form-select screen">
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+        <option>6</option>
+      </select>
+      <div class="ml-5 mr-2">Seed</div>
+      <input v-model.number="seed" class="form-control form-seed" maxlength="24">
+    </div>
+    <div v-for="(row, rowIndex) in items" :key="rowIndex" class="d-flex justify-content-around s-row">
+      <div v-for="(col, colIndex) in row" :key="colIndex" class="text-right">
+        <div class="sub1">{{ col[0] }}</div>
+        <div class="sub2">- {{ col[1] }}</div>
+        <div :style="visibility" class="answer">{{ col[0] - col[1] }}</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+  <script>
+    new Vue({
+      el: "#app",
+      data: {
+        row: 5,
+        col: 4,
+        digit: 4,
+        showAnswer: false,
+        seed: 1,
+        params: {
+          x: 1,
+          y: 1,
+          z: 1,
+          w: 1,
+        },
+      },
+      computed: {
+        visibility() {
+          return { visibility: this.showAnswer ? 'visible' : 'hidden' }
+        },
+        items() {
+          const min = 10 ** (this.digit - 1)
+          const max = 10 ** this.digit - 1
+          return [...Array(this.row)].map(() =>
+            [...Array(this.col)].map(() =>
+              ([this.random(min, max), this.random(min, max)].sort().reverse())
+            )
+          )
+        }
+      },
+      watch: {
+        seed(value) {
+          this.params.w = value
+          this.params.x = 123456789
+          this.params.y = 362436069
+          this.params.z = 521288629
+        },
+      },
+      methods: {
+        random(min, max) {
+          let t;
+
+          t = this.params.x ^ (this.params.x << 11)
+          this.params.x = this.params.y
+          this.params.y = this.params.z
+          this.params.z = this.params.w
+          this.params.w = (this.params.w ^ (this.params.w >>> 19)) ^ (t ^ (t >>> 8));
+          const r = Math.abs(this.params.w);
+          return min + (r % (max + 1 - min));
+        }
+      },
+      mounted() {
+        const now = new Date()
+        this.seed =
+          now.getFullYear() +
+          ('0' + (now.getMonth() + 1)).slice(-2) +
+          ('0' + now.getDate()).slice(-2) +
+          ('0' + now.getHours()).slice(-2) +
+          ('0' + now.getMinutes()).slice(-2)
+      },
+    })
+  </script>
+</body>
+
+</html>
